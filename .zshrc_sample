@@ -1,0 +1,37 @@
+length=10
+random_string=$(dd if=/dev/urandom bs=1 count=$length 2>/dev/null | base64 | tr -d '/+' | tr -dc 'a-zA-Z0-9' | head -c $length)
+
+mkdir -p ~/.tmp/
+touch ~/.tmp/$random_string.csv
+
+# Function to run before each command is executed
+preexec() {
+    # Capture the start time
+    start_time=$(date +%s)
+    current_cmd=$1
+}
+
+# Function to run after each command is executed
+precmd() {
+    local exit_code=$?
+    # Capture the end time
+    end_time=$(date +%s)
+
+    # Calculate and display the execution time
+    execution_time=$((end_time - start_time))
+
+    if [[ -z $command_cmd ]]; then
+        echo "$current_cmd" >>  ~/.tmp/$random_string.csv
+        echo "$start_time" >>  ~/.tmp/$random_string.csv
+        echo "$exit_code" >>  ~/.tmp/$random_string.csv
+        echo "$execution_time" >>  ~/.tmp/$random_string.csv
+    fi
+}
+
+cleanup() {
+    precmd
+
+    rm -rf ~/.tmp/$random_string.csv
+}
+
+trap cleanup EXIT
