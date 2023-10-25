@@ -2,7 +2,7 @@ FROM python:3.8-slim-buster
 
 RUN apt-get update
 
-RUN apt-get -y install default-libmysqlclient-dev
+RUN  apt-get -y install python3-dev default-libmysqlclient-dev build-essential pkg-config
 
 WORKDIR /python-docker
 
