@@ -19,4 +19,6 @@ ENV PORT=9090
 
 EXPOSE 9090
 
+ENV FLASK_APP=server.py
+
 CMD [ "python3", "server.py"]
