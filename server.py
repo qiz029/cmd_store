@@ -8,7 +8,7 @@ from sqlalchemy.sql import func
 import datetime
 import os
 
-connStrTpl = "mysql://{0}:{1}@{2}/{3}"
+connStrTpl = "mysql+pymysql://{0}:{1}@{2}/{3}"
 dbUser = os.environ["DB_USER"]
 dbPwd = os.environ["DB_PASSWORD"]
 dbAddress = os.environ["DB_ADDR"]
