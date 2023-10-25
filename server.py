@@ -2,9 +2,8 @@ from flask import Flask
 from flask import request
 from flask import jsonify, make_response
 
-from flask_sqlalchemy import SQLAlchemy
+import mysql.connector
 
-from sqlalchemy.sql import func
 import datetime
 import os
 
@@ -16,25 +15,22 @@ dbDB = os.environ["DB_DATABASE"]
 
 connStr = connStrTpl.format(dbUser, dbPwd, dbAddress, dbDB)
 
+creation = "CREATE TABLE IF NOT EXISTS `commands` ( `ID` INT NOT NULL AUTO_INCREMENT, `CommandBody` VARCHAR(255), `StartTime` DATETIME NOT NULL, `TimeElapsedInSec` INT NOT NULL, `ExitCode` INT NOT NULL, `UserId` VARCHAR(255) NOT NULL, KEY `ExitCodeIndex` (`ExitCode`) USING BTREE, PRIMARY KEY (`ID`) );"
+insertion = "INSERT INTO commands (CommandBody, StartTime, TimeElapsedInSec, ExitCode, UserId) VALUES (%s, %s, %s, %s, %s)"
+
+config = {
+        'user': dbUser,
+        'password': dbPwd,
+        'host': dbAddress.split(":")[0],
+        'port': dbAddress.split(":")[1],
+        'database': dbDB,
+    }
+connection = mysql.connector.connect(**config)
+c = connection.cursor()
+c.execute(creation)
+c.close()
+
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = connStr
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
-db = SQLAlchemy(app)
-
-insertion = "INSERT INTO commands (CommandBody, StartTime, TimeElapsedInSec, ExitCode) VALUES (%s, %s, %s, %s)"
-
-class Command(db.Model):
-    __tablename__ = 'commands'
-    id = db.Column(db.Integer, primary_key=True)
-    commandBody = db.Column(db.String(255))
-    startTime = db.Column(db.DateTime)
-    timeElapsedInSec = db.Column(db.Integer)
-    exitCode = db.Column(db.Integer, index=True)
-    userId = db.Column(db.String(255), index=True)
-
-    def __repr__(self):
-        return '<Command %r>' % self.name
 
 @app.route('/healthz')
 def healthz():
@@ -43,9 +39,8 @@ def healthz():
     return response
 
 @app.route('/cmd/<user_id>', methods = ['POST'])
-def cmd(session):
+def cmd(user_id):
     if request.method == "POST": 
-        user_id = request.view_args["user_id"]
         csv_data = request.data.decode('utf-8')  # Assuming the data is encoded as UTF-8
         csv_lines = csv_data.split('\n')  # Split the data into lines
 
@@ -84,15 +79,13 @@ def cmd(session):
 
 def writeCommandsToDb(rows):
     print("successfully connect to database")
+    cursor = connection.cursor()
     for row in rows:
         timestamp = datetime.datetime.fromtimestamp(int(row['start_time']))
         start = timestamp.strftime('%Y-%m-%d %H:%M:%S')
-        db.session.add(Command(commandBody = row['command'],
-                            startTime = start,
-                            exitCode = row['exit_code'],
-                            timeElapsedInSec = row['execution_time'],
-                            userId = row['user_id']))
-    db.session.commit()
+        cursor.execute(insertion, (row['command'], start, row['execution_time'], row['exit_code'], row['user_id']))
+    connection.commit()
+    cursor.close()
     print("successfully insert data")
 
 if __name__ == '__main__':
