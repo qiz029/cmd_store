@@ -1,6 +1,6 @@
 from flask import Flask
 from flask import request
-from flask import jsonify
+from flask import jsonify, make_response
 
 from flask_sqlalchemy import SQLAlchemy
 
@@ -36,9 +36,11 @@ class Command(db.Model):
     def __repr__(self):
         return '<Command %r>' % self.name
 
-@app.route('/ping')
-def ping():
-    return 'pong'
+@app.route('/healthz')
+def healthz():
+    response = make_response("OK", 200)
+    response.mimetype = "text/plain"
+    return response
 
 @app.route('/cmd/<user_id>', methods = ['POST'])
 def cmd(session):
