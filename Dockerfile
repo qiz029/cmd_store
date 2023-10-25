@@ -15,5 +15,8 @@ ENV DB_USER=cmd_svc
 ENV DB_PASSWORD=secret
 ENV DB_ADDR=localhost:3306
 ENV DB_DATABASE=cmd_store_db
+ENV PORT=9090
 
-CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
+EXPOSE 9090
+
+CMD [ "python3", "server.py"]

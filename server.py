@@ -92,3 +92,7 @@ def writeCommandsToDb(rows):
                             userId = row['user_id']))
     db.session.commit()
     print("successfully insert data")
+
+if __name__ == '__main__':
+    port = os.environ["PORT"]
+    app.run(debug=True, host='0.0.0.0', port=port)
