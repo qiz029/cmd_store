@@ -21,4 +21,4 @@ EXPOSE 9090
 
 ENV FLASK_APP=server.py
 
-CMD [ "python3", "server.py"]
+CMD [ "python3", "run.py"]
