@@ -6,6 +6,10 @@ from app import db_conn
 
 @app.route('/cmd/<user_id>', methods = ['POST', 'GET'])
 def cmd(user_id):
+    apiKey = request.headers.get("X-API-KEY")
+    if not db_conn.validateUserApiKey(user_id=user_id, api_key=apiKey):
+        return jsonify({"message": "unauthorized"}), 401
+
     if request.method == "POST": 
         return writeCommands(request, user_id)
     elif request.method == 'GET':

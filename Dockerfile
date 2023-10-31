@@ -17,6 +17,9 @@ ENV DB_ADDR=localhost:3306
 ENV DB_DATABASE=cmd_store_db
 ENV PORT=9090
 
+ENV USER_ID_1=user1
+ENV API_KEY_1=bla
+
 EXPOSE 9090
 
 ENV FLASK_APP=server.py

@@ -11,8 +11,15 @@ dbDB = os.environ["DB_DATABASE"]
 connStr = connStrTpl.format(dbUser, dbPwd, dbAddress, dbDB)
 
 creation = "CREATE TABLE IF NOT EXISTS `commands` ( `ID` INT NOT NULL AUTO_INCREMENT, `CommandBody` VARCHAR(255), `StartTime` DATETIME NOT NULL, `TimeElapsedInSec` INT NOT NULL, `ExitCode` INT NOT NULL, `UserId` VARCHAR(255) NOT NULL, KEY `ExitCodeIndex` (`ExitCode`) USING BTREE, PRIMARY KEY (`ID`) );"
+loginCreation = "CREATE TABLE IF NOT EXISTS `users` ( `ID` INT NOT NULL AUTO_INCREMENT, `UserId` VARCHAR(255), `ApiKey` VARCHAR(255), UNIQUE (`UserId`), PRIMARY KEY (`ID`) );"
 insertion = "INSERT INTO commands (CommandBody, StartTime, TimeElapsedInSec, ExitCode, UserId) VALUES (%s, %s, %s, %s, %s)"
 selection = 'SELECT CommandBody, StartTime, TimeElapsedInSec, ExitCode FROM commands WHERE UserId = %s ORDER BY StartTime DESC'
+
+loginInsertion = 'INSERT IGNORE INTO `users` (UserId, ApiKey) VALUES (%s, %s);'
+loginSelection = 'SELECT ApiKey FROM users WHERE UserId = %s;'
+
+userId1 = os.environ["USER_ID_1"]
+apiKey1 = os.environ["API_KEY_1"]
 
 config = {
         'user': dbUser,
@@ -24,7 +31,28 @@ config = {
 connection = mysql.connector.connect(**config)
 c = connection.cursor()
 c.execute(creation)
+c.execute(loginCreation)
 c.close()
+
+def writeApiKey(user_id, api_key):
+    print("successfully connect to database")
+    cursor = connection.cursor()
+    cursor.execute(loginInsertion, (user_id, api_key))
+    connection.commit()
+    cursor.close()
+    print("successfully create user {0}".format(user_id))
+    
+def validateUserApiKey(user_id, api_key):
+    if user_id == "" or api_key == "":
+        return False
+    cursor = connection.cursor()
+    cursor.execute(loginSelection, (user_id, ))
+    keys = cursor.fetchall()
+    if (str(keys[0][0]) == api_key):
+        cursor.close()
+        return True
+    cursor.close()
+    return False
 
 def writeCommandsToDb(rows):
     print("successfully connect to database")
@@ -52,3 +80,6 @@ def getCommands(user_id):
     cursor.close()
     print("successfully retrieved {0} entries".format(len(retVal)))
     return retVal
+
+def __init__():
+    writeApiKey(userId1, apiKey1)
