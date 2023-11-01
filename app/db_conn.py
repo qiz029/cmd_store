@@ -48,7 +48,7 @@ def validateUserApiKey(user_id, api_key):
     cursor = connection.cursor()
     cursor.execute(loginSelection, (user_id, ))
     keys = cursor.fetchall()
-    if (str(keys[0][0]) == api_key):
+    if (str(keys[0]) == api_key):
         cursor.close()
         return True
     cursor.close()
