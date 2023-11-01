@@ -34,13 +34,12 @@ c.execute(creation)
 c.execute(loginCreation)
 c.close()
 
-def writeApiKey(user_id, api_key):
-    print("successfully connect to database")
-    cursor = connection.cursor()
-    cursor.execute(loginInsertion, (user_id, api_key))
-    connection.commit()
-    cursor.close()
-    print("successfully create user {0}".format(user_id))
+print("successfully connect to database")
+cursor = connection.cursor()
+cursor.execute(loginInsertion, (userId1, apiKey1))
+connection.commit()
+cursor.close()
+print("successfully create user {0}".format(userId1))
     
 def validateUserApiKey(user_id, api_key):
     if user_id == "" or api_key == "":
@@ -80,6 +79,3 @@ def getCommands(user_id):
     cursor.close()
     print("successfully retrieved {0} entries".format(len(retVal)))
     return retVal
-
-def __init__():
-    writeApiKey(userId1, apiKey1)
